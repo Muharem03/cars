@@ -1,84 +1,160 @@
 ﻿@page "/car/{CarId}"
+@using CarGo.Models
+@using CarGo.Data
+@using CarGo.Services
 @rendermode InteractiveServer
+@inject appDbContext dbContext
 @inject NavigationManager Navigation
+@inject AppState appState
 
-<h3 class="text-center mb-4 fw-bold text-primary">🚗 Car Details</h3>
+<PageTitle>Car Details</PageTitle>
+
+<h3 class="text-center mb-4 fw-bold text-black display-5"> Car Details</h3>
 
 @if (car != null)
 {
-    <div class="container shadow-lg p-4 rounded-3 bg-white">
+    
+    <div class="container shadow-lg p-4 rounded-4 bg-light">
+        <div class="d-flex flex-wrap gap-2 mt-4">
+            <button class="btn " Size="ButtonSize.Small" @onclick="OnGoBack">⬅️ Back to List</button>
+        </div>
         <div class="row">
-            <!-- Car Image -->
-            <div class="col-md-6">
-                <img src="@car.ImageUrl" class="img-fluid rounded mb-4" alt="@car.Brand @car.Model">
+          
+            <!-- Car Image Carousel -->
+            <div class="col-md-6 mb-4 mb-md-0">
+                @if (images.Any())
+                {
+                    <div id="carouselExampleFade" class="carousel slide carousel-fade">
+                        <div class="carousel-inner rounded-4 shadow-sm">
+                            @for (int i = 0; i < images.Count; i++)
+                            {
+                                <div class="carousel-item @(i == 0 ? "active" : "")">
+                                    <img src="@images[i].Url" class="d-block w-100 rounded-4" alt="Car Image">
+                                </div>
+                            }
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon fs-4"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                            <span class="carousel-control-next-icon fs-4"></span>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-center text-muted fst-italic">No images available for this car.</p>
+                }
             </div>
+
             <!-- Car Details -->
             <div class="col-md-6">
-                <h4 class="fw-bold">@car.Brand @car.Model (@car.Year)</h4>
-                <p><strong>Price:</strong> $@car.Price</p>
-                <p><strong>Transmission:</strong> @car.TransmissionType</p>
-                <p><strong>Kilometers:</strong> @car.Kilometers km</p>
-                <p><strong>Horsepower:</strong> @car.HorsePower HP</p>
-                <p><strong>Fuel Type:</strong> @car.FuelType</p>
-                <p><strong>Emission Class:</strong> @car.EmissionClass</p>
+                <h4 class="fw-bold text-dark mb-4">@car.Brand @car.Model (@car.Year)</h4>
 
-                <button class="btn btn-primary fw-semibold" @onclick="OnContactDealer">📞 Contact Dealer</button>
-                <button class="btn btn-outline-secondary ms-2" @onclick="OnGoBack">⬅️ Back to List</button>
+                <!-- Car Specifications with Icons -->
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-cogs fa-2x text-secondary me-3"></i>
+                        <span><strong>Transmission:</strong> @car.Transmission</span>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-tachometer-alt fa-2x text-secondary me-3"></i>
+                        <span><strong>Kilometers:</strong> @car.Km km</span>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-horse fa-2x text-secondary me-3"></i>
+                        <span><strong>Horsepower:</strong> @car.Hp HP</span>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-gas-pump fa-2x text-secondary me-3"></i>
+                        <span><strong>Fuel Type:</strong> @car.Fuel</span>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-palette fa-2x text-secondary me-3"></i>
+                        <span><strong>Color:</strong> @car.Color</span>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-leaf fa-2x text-secondary me-3"></i>
+                        <span><strong>Emission Class:</strong> @car.EmissionClass</span>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-map-marker-alt fa-2x text-secondary me-3"></i>
+                        <span><strong>Location:</strong> @car.Location</span>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-user-tie fa-2x text-secondary me-3"></i>
+                        <span><strong>Seller:</strong> @car.Seller?.FirstName</span>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-calendar-alt fa-2x text-secondary me-3"></i>
+                        <span><strong>Listed On:</strong> @car.CreatedAt.ToShortDateString()</span>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <Toasts class="p-3" Messages="messages" AutoHide="true" StackLength="3" Placement="ToastsPlacement.TopRight" />
+                    <button class="btn btn-dark btn-lg shadow fw-semibold " @onclick="OnContactDealer">Contact Seller</button>
+                    <button class="btn btn-secondary btn-lg shadow fw-semibold  text-white" @onclick="OnTransportCar">Transport Car</button>
+                    <button class="btn btn-secondary btn-lg shadow fw-semibold  text-white" @onclick="OnInspectCar">Inspect Car</button>
+                 </div>
             </div>
+        </div>
+
+        <!-- Price Section -->
+        <div class="text-end mt-5">
+            <span class="fw-bold display-6 text-dark">€@car.Price</span>
         </div>
     </div>
 }
 else
 {
-    <p class="text-danger text-center fw-bold">Car details not found.</p>
-    <button class="btn btn-outline-secondary" @onclick="OnGoBack">⬅️ Back to List</button>
+    <p class="text-danger text-center fw-bold mt-5">❌ Car details not found.</p>
+    <div class="text-center">
+        <button class="btn btn-outline-secondary shadow-sm" @onclick="OnGoBack">⬅️ Back to List</button>
+    </div>
 }
 
 @code {
     [Parameter]
     public string CarId { get; set; }
 
+
     private Car car;
+    private List<Image> images = new();
+
+    public CarDetails()
+    {
+    }
 
     protected override void OnInitialized()
     {
-        LoadCarDetails();
-    }
-
-    private void LoadCarDetails()
-    {
-        var allCars = new List<Car>
+        if (int.TryParse(CarId, out int carId))
         {
-            new Car { Id = "1", Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg" },
-            new Car { Id = "2", Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" }
-        };
-
-        car = allCars.FirstOrDefault(c => c.Id == CarId);
+            car = dbContext.Cars.FirstOrDefault(c => c.Id == carId);
+            images = dbContext.Images.Where(img => img.CarId == carId).ToList();
+        }
     }
-
+    
+  
     private void OnContactDealer()
     {
-        Navigation.NavigateTo($"/contact?carId={CarId}");
+        appState.SelectedCar = car;
+        Navigation.NavigateTo("/useraccount");
     }
+
 
     private void OnGoBack()
     {
         Navigation.NavigateTo("/cars");
     }
 
-    public class Car
+    private void OnInspectCar()
     {
-        public string Id { get; set; }
-        public string Brand { get; set; }
-        public string Model { get; set; }
-        public int Year { get; set; }
-        public decimal Price { get; set; }
-        public string TransmissionType { get; set; }
-        public int Kilometers { get; set; }
-        public int HorsePower { get; set; }
-        public string FuelType { get; set; }
-        public string EmissionClass { get; set; }
-        public string ImageUrl { get; set; }
+        Navigation.NavigateTo($"/post-car");
+    }
+    private void OnTransportCar()
+    {
+        Navigation.NavigateTo($"/useraccount");
     }
 }
-

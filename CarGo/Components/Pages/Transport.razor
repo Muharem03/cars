@@ -1,8 +1,14 @@
 ﻿@page "/transport"
+@using CarGo.Data
+@using CarGo.Models
+@inject appDbContext dbContext;
+@inject NavigationManager navigation;
 @rendermode InteractiveServer
 
+<PageTitle>Transport</PageTitle>
+
 <!-- 🚛 Hero Section -->
-<section class="hero-section text-center text-white d-flex align-items-center justify-content-center" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
+<section class="hero-section text-center text-white d-flex align-items-center justify-content-center" style="background:url('/traa.jpg') no-repeat center center/cover ;height: 500px;">
     <div >
         <h1 class="fw-bold">Transportoni Automjetin Tuaj me Siguri dhe Besueshmëri</h1>
         <p class="lead">Partnerët tanë të transportit ofrojnë zgjidhje të sigurta dhe të përshtatshme për çdo destinacion.</p>
@@ -42,44 +48,26 @@
 <section class="container mt-5">
     <h2 class="text-center fw-bold mb-4">Partnerët Tanë</h2>
     <div class="row text-center">
-        <div class="col-md-3">
-            <img src="/images/partner1.png" class="img-fluid" alt="Partner 1">
-        </div>
-        <div class="col-md-3">
-            <img src="/images/partner2.png" class="img-fluid" alt="Partner 2">
-        </div>
-        <div class="col-md-3">
-            <img src="/images/partner3.png" class="img-fluid" alt="Partner 3">
-        </div>
-        <div class="col-md-3">
-            <a href="#" class="btn btn-outline-primary">Shiko Partnerët e Plotë</a>
-        </div>
-    </div>
-</section>
-
-<!-- 📦 Tracking Section -->
-<section class="container mt-5 p-4 bg-light shadow rounded">
-    <h2 class="text-center fw-bold mb-4">Gjurmimi i Transportit</h2>
-    <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Vendos Kodin e Transportit">
-        <button class="btn btn-primary">Gjurmo Transportin</button>
-    </div>
-</section>
-
-<!-- 💬 FAQ Section -->
-<section class="container mt-5">
-    <h2 class="text-center fw-bold mb-4">Pyetje të Shpeshta</h2>
-    <div class="accordion" id="faqAccordion">
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                    Si mund të gjurmoj automjetin tim gjatë transportit?
-                </button>
-            </h2>
-            <div id="faq1" class="accordion-collapse collapse show">
-                <div class="accordion-body">Përdorni kodin tuaj unik të transportit për të gjurmuar statusin në kohë reale.</div>
-            </div>
-        </div>
+        @if (transportCompanies.Any())
+        {
+            @foreach (var company in transportCompanies)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 shadow-sm">
+                        <img src="/images/transport-placeholder.jpg" class="card-img-top" alt="@company.Name">
+                        <div class="card-body">
+                            <h5 class="card-title">@company.Name</h5>
+                            <p><strong>Kontakti:</strong> @company.ContactInfo</p>
+                            <p>@(company.Rating.HasValue ? $"{company.Rating}⭐ Rating" : "No Rating")</p>
+                         </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted">Nuk u gjetën kompani transporti.</p>
+        }
     </div>
 </section>
 
@@ -89,5 +77,19 @@
     <a href="#" class="btn btn-light btn-lg mt-3">Na Kontaktoni</a>
 </section>
 
+@code {
+    private List<TransportCompany> transportCompanies = new List<TransportCompany>();
+
+    
+        // Marrja e kompanive nga databaza
+    protected override void OnInitialized()
+    {
+        transportCompanies = dbContext.TransportCompany
+            .ToList();
+    }
+    
+
+   
+}
 
 

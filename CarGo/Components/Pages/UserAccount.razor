@@ -1,0 +1,158 @@
+﻿@page "/useraccount"
+@rendermode InteractiveServer
+@using CarGo.Services
+@inject AppState appState
+
+<section class="user-account-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3 class="mb-0">Llogaria Ime</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <img src="https://via.placeholder.com/150" alt="Profile Image" class="rounded-circle mb-2" />
+                            <h4>@user.FirstName @user.LastName</h4>
+                            <p class="text-muted">Rating: ⭐ @user.Rating</p>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Email:</strong> @user.Email</p>
+                                <p><strong>Telefon:</strong> @user.PhoneNumber</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Adresa:</strong> @user.Address</p>
+                                <p><strong>Qyteti:</strong> @user.City</p>
+                                <p><strong>Vendi:</strong> @user.Country</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button class="btn btn-outline-primary me-2" @onclick="EditProfile">Ndrysho Profilin</button>
+                        <button class="btn btn-outline-danger" @onclick="Logout">Dil</button>
+                    </div>
+                </div>
+                @if (appState.SelectedCar != null)
+                {
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h4>Contacted Car Details</h4>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Brand:</strong> @appState.SelectedCar.Brand</p>
+                            <p><strong>Model:</strong> @appState.SelectedCar.Model</p>
+                            <p><strong>Price:</strong> €@appState.SelectedCar.Price</p>
+                            <p><strong>Seller:</strong> @appState.SelectedCar.Seller?.FirstName</p>
+                            <p><strong>Listed On:</strong> @appState.SelectedCar.CreatedAt.ToShortDateString()</p>
+                        </div>
+                        <div class="card-footer text-end">
+                            <button class="btn btn-secondary me-2" @onclick="InspectCar">Inspekto</button>
+                            <button class="btn btn-dark" @onclick="TransportCar">Transporto</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No car selected for contact.</p>
+                }
+
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta text-center py-5 text-black">
+    <div>
+        <h2>Faleminderit që jeni pjesë e komunitetit tonë!</h2>
+    </div>
+</section>
+
+@code {
+    private User user = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch user details after login
+        await LoadUserData();
+    }
+    private void InspectCar()
+    {
+        NavigationManager.NavigateTo("/inspect-car"); // Replace with actual inspection page
+    }
+
+    private void TransportCar()
+    {
+        NavigationManager.NavigateTo("/transport-car"); // Replace with actual transportation page
+    }
+
+    private async Task LoadUserData()
+    {
+        user = new User
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                Email = "john.doe@example.com",
+                PhoneNumber = "+49 123 456789",
+                Address = "123 Berlin St",
+                City = "Berlin",
+                Country = "Germany",
+                Rating = 4.5f
+            };
+
+        // Example database fetching logic (commented out for simplicity)
+        /*
+        using (var connection = new SqlConnection("YourConnectionString"))
+        {
+            await connection.OpenAsync();
+            var query = "SELECT FirstName, LastName, Email, PhoneNumber, Address, City, Country, Rating FROM Users WHERE Id = @UserId";
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        user.FirstName = reader.GetString(0);
+                        user.LastName = reader.GetString(1);
+                        user.Email = reader.GetString(2);
+                        user.PhoneNumber = reader.GetString(3);
+                        user.Address = reader.GetString(4);
+                        user.City = reader.GetString(5);
+                        user.Country = reader.GetString(6);
+                        user.Rating = reader.GetFloat(7);
+                    }
+                }
+            }
+        }
+        */
+    }
+
+    private void EditProfile()
+    {
+        NavigationManager.NavigateTo("/editprofile");
+    }
+
+    private void Logout()
+    {
+        NavigationManager.NavigateTo("/account");
+    }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    public class User
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public float Rating { get; set; }
+    }
+}

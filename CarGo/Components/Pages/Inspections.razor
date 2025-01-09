@@ -1,16 +1,20 @@
 ﻿@page "/inspections"
+@using CarGo.Models
+@using CarGo.Data
+@inject appDbContext dbContext;
+@inject NavigationManager navigation;
 @rendermode InteractiveServer
+<PageTitle>Inspections</PageTitle>
+
 <!-- 🛡️ Seksioni 1: Hero Section (Banner Kryesor) -->
-<section class="hero-section py-5 text-center bg-primary text-white" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
+<section class="hero-section text-center text-white d-flex align-items-center justify-content-center" style="background:url('/in.jpg') no-repeat center center/cover ;height: 500px;">
     <div >
-        <h1 class="display-4">Inspektime Profesionale për një Blerje të Sigurt!</h1>
+        <h1 class="fw-bold">Inspektime Profesionale për një Blerje të Sigurt!</h1>
         <p class="lead">Ekspertët tanë ju ndihmojnë të merrni vendimin e duhur për blerjen e automjetit tuaj.</p>
         <div class="mt-4">
             <button class="btn btn-light me-2">Apliko si Inspektor</button>
-            <button class="btn btn-outline-light">Kërko Inspektor</button>
         </div>
     </div>
-    <img src="/images/inspector-hero.jpg" alt="Inspektor me tabletë që kontrollon një makinë" class="img-fluid mt-4">
 </section>
 
 <!-- 📋 Seksioni 2: Pse të Zgjidhni Inspektorët Tanë? -->
@@ -37,71 +41,64 @@
     </div>
 </section>
 
-<!-- 🔍 Seksioni 3: Kërko një Inspektor -->
-<section class="search-inspector py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-4">Kërko një Inspektor</h2>
-        <form class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Lokacioni:</label>
-                <select class="form-select">
-                    <option value="">Zgjidh qytetin</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Disponueshmëria:</label>
-                <input type="date" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Specializimi:</label>
-                <select class="form-select">
-                    <option>Inspektor për makina të përdorura</option>
-                    <option>Inspektor për makina të reja</option>
-                    <option>Inspektor për makina luksi</option>
-                </select>
-            </div>
-            <div class="col-12 text-center mt-3">
-                <button class="btn btn-primary">Kërko Inspektor</button>
-            </div>
-        </form>
-    </div>
-</section>
-
 
 <!-- 🧑‍🔧 Seksioni 5: Inspektorët më të Mirë -->
 <section class="featured-inspectors py-5 bg-light">
     <div class="container text-center">
         <h2>Inspektorët më të Mirë</h2>
         <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <img src="/images/inspector1.jpg" class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title">John Doe</h5>
-                        <p>5+ vite përvojë</p>
-                        <button class="btn btn-secondary">Rezervo</button>
+            @if (inspectors.Any())
+            {
+                @foreach (var inspector in inspectors)
+                {
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 shadow-sm">
+                            <img src="/images/inspector-placeholder.jpg" class="card-img-top" alt="@inspector.FirstName @inspector.LastName">
+                            <div class="card-body">
+                                <h5 class="card-title">@inspector.FirstName @inspector.LastName</h5>
+                                <p>@(inspector.Rating.HasValue ? $"{inspector.Rating}⭐ Rating" : "No Rating")</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <img src="/images/inspector2.jpg" class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title">Jane Smith</h5>
-                        <p>8+ vite përvojë</p>
-                        <button class="btn btn-secondary">Rezervo</button>
-                    </div>
-                </div>
-            </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted">Nuk u gjetën inspektorë.</p>
+            }
         </div>
     </div>
 </section>
+
 
 <!-- 📲 Seksioni 9: Thirrje për Veprim -->
 <section class="cta text-center py-5 bg-primary text-white" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
     <div>
         <h2>Bëhu pjesë e rrjetit tonë të inspektorëve profesionalë sot!</h2>
-        <button class="btn btn-light me-2">Apliko Tani</button>
-        <button class="btn btn-outline-light">Kontakto për Më Shumë Informacion</button>
+        <p class="lead">Për të u bërë inspektor i certifikuar në platformën tonë, ju duhet të plotësoni disa kushte dhe kërkesa:</p>
+        <ul class="text-start mx-auto" style="max-width: 600px;">
+            <li><strong>Përvojë e mjaftueshme:</strong> Duhet të keni të paktën 2 vjet përvojë në inspektimin e automjeteve.</li>
+            <li><strong>Certifikatë profesionale:</strong> Një certifikatë e njohur që vërteton aftësitë tuaja si inspektor automjetesh është e nevojshme.</li>
+            <li><strong>Trajnim i detajuar:</strong> Do të kaloni një proces trajnimi të detajuar për të garantuar që përmbushni standardet tona të larta.</li>
+            <li><strong>Aftësi të mira komunikuese:</strong> Duhet të keni aftësi të shkëlqyera për t’u komunikur me klientët dhe për të ofruar raporte të qarta dhe të sakta.</li>
+            <li><strong>Teknikë e avancuar:</strong> Njohuri të thella mbi sistemet dhe teknologjinë e automjeteve, përfshirë diagnozën dhe vlerësimin e gjendjes teknike.</li>
+            <li><strong>Licencë dhe sigurime:</strong> Një licencë aktive dhe sigurime profesionale janë të kërkuara për t’u regjistruar si inspektor i autorizuar.</li>
+        </ul>
+        <p class="mt-3">Nëse plotësoni këto kushte dhe dëshironi të bëheni pjesë e ekipit tonë të inspektorëve profesionalë, ju lutemi <a href="mailto:info@carplatform.com" class="text-light">kontaktoni për më shumë informacion</a>.</p>
     </div>
 </section>
+
+
+@code {
+    private List<User> inspectors = new List<User>();
+
+    protected override void OnInitialized()
+    {
+        // Fetch inspectors from the database
+        inspectors = dbContext.Users
+            .Where(user => user.Role == "Inspector")
+            .ToList();
+    }
+
+   
+}

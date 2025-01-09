@@ -1,14 +1,19 @@
 using CarGo.Components;
 using CarGo.Data;
 using Microsoft.EntityFrameworkCore;
+using CarGo.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddBootstrapBlazor();
+
 builder.Services.AddDbContext<appDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSingleton<AppState>();
+
 
 var app = builder.Build();
 
@@ -27,5 +32,5 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
+app.UseStaticFiles();
 app.Run();
